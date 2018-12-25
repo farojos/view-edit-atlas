@@ -1,0 +1,12 @@
+{
+  "presets": [["react-app", { "absoluteRuntime": false }]],
+  "plugins": [
+    [
+      "import",
+      {
+        "libraryName": "antd",
+        "style": "css"
+      }
+    ]
+  ]
+}

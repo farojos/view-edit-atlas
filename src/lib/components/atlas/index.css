@@ -1,0 +1,52 @@
+.ant-menu-item-selected {
+  color: lightgray;
+}
+
+.ant-menu-horizontal > .ant-menu-item-selected,
+.ant-menu-horizontal > .ant-menu-item:hover,
+.ant-menu-item:hover {
+  color: lightgray;
+}
+
+.ant-menu-submenu-title:hover,
+.ant-menu-submenu-active > .ant-menu-submenu-title,
+.ant-menu-horizontal > .ant-menu-submenu-open,
+.ant-menu-horizontal > .ant-menu-submenu-active,
+.ant-menu-horizontal > .ant-menu-submenu:hover,
+.ant-menu-horizontal > .ant-menu-submenu-selected {
+  color: lightgray;
+  border-bottom: 2px solid lightgray;
+}
+.ant-layout,
+.ant-layout-content {
+  background: white;
+  border-color: white;
+}
+
+.ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
+  background-color: lightgray;
+  color: black;
+}
+.ant-menu.ant-menu-light > .ant-menu-item:after {
+  border-right: 2px solid gray;
+}
+/*If some weird things happend on navbar (infinite rerender navbar) decomment these lines*/
+/* .ant-menu-overflowed-submenu {
+  display: none !important; 
+}
+.ant-menu-item {
+  display: flex !important;
+} */
+.ant-carousel .slick-dots li.slick-active button {
+  background: gray;
+  opacity: 1;
+  width: 24px;
+}
+.ant-carousel .slick-dots {
+  bottom: -22px;
+}
+.ant-carousel .slick-dots li button {
+  background: lightgray;
+  opacity: 1;
+  width: 24px;
+}
