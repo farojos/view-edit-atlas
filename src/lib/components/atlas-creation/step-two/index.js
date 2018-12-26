@@ -163,6 +163,7 @@ export class StepTwo extends Component {
       switch (type) {
         case 'm3d':
           anatomic_map.url3d = fUrl;
+          // GABO: ACA ACABA DE LLEGAR LA URL CON EL ARCHIVO ZIP
           break;
         case 'xray':
           anatomic_map.xray.push({ url: fUrl });
