@@ -1,5 +1,6 @@
 import React, { Component, createRef } from 'react';
 import axios from 'axios';
+import './index.css';
 import Renderer3D, {
   Loading,
   InfoPanel,
