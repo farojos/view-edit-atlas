@@ -9116,10 +9116,10 @@ remove-trailing-separator@^1.0.1:
   resolved "https://registry.yarnpkg.com/remove-trailing-separator/-/remove-trailing-separator-1.1.0.tgz#c24bce2a283adad5bc3f58e0d48249b92379d8ef"
   integrity sha1-wkvOKig62tW8P1jg1IJJuSN52O8=
 
-renderer3d-model@^1.0.11:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/renderer3d-model/-/renderer3d-model-1.0.11.tgz#a438a25f316b198ef84c9385fbf6ceefd9c6ccac"
-  integrity sha512-rinPT/FQ5QX7mxd8PeoS0sntc8Tjy8Loqh2VPRAUT0YjrkqyD4YGJ2s7ncOYObdYhx9XhaixgeUGABgYlN3hxQ==
+renderer3d-model@^1.0.12:
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/renderer3d-model/-/renderer3d-model-1.0.12.tgz#649058bbc6ed6cd7dfbf1a7f855f13a408fff9f5"
+  integrity sha512-BDMMfPm6jIrJvPNJomnpg4P6GORU59PzhNRUshp3BzVTwDkMoYmsI5G3iwnx6Mub6nJ5qIPAiA2xTGZIY1/efA==
   dependencies:
     "@tweenjs/tween.js" "^17.2.0"
     axios "^0.18.0"
