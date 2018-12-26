@@ -47,6 +47,9 @@ const CategoryName = styled.h2`
   color: gray;
   display: inline-block;
 `;
+const ColForm = styled(Col)`
+  margin-bottom: 10px;
+`;
 
 export class StepTwo extends Component {
   constructor(props) {
@@ -71,7 +74,11 @@ export class StepTwo extends Component {
       'http://ec2-18-222-136-65.us-east-2.compute.amazonaws.com/atlas/' +
       this.props.atlasId;
     const result = await axios.get(url, config);
-    this.setState({ atlas: result.data });
+    const atlas = result.data;
+    atlas.atlas_categories.map(item => {
+      item.anatomic_maps = [];
+    });
+    this.setState({ atlas });
   }
   send = async values => {
     // const description = values.description;
@@ -105,82 +112,155 @@ export class StepTwo extends Component {
     // };
     // const result = await axios(options);
     // this.props.changeStep({ atlasId: result.data.id, step: 2 });
+    //   {"description": "Lorem IPSUM",
+    //   "m3d": {
+    //       "orbit": {
+    //           "position": {
+    //               "x": 17,
+    //               "y": 13,
+    //               "z": 550
+    //           },
+    //           "rotation": {
+    //               "x": 1.633995837560991,
+    //               "y": 0.049426731896162514,
+    //               "z": -3.001684471665421
+    //           }
+    //       },
+    //       "attachments": [
+    //           {
+    //               "position": {
+    //                   "x": -29.12763747984428,
+    //                   "y": -5.589877628129436,
+    //                   "z": 11.32405740938134
+    //               },
+    //               "data": {
+    //                   "title": "M. Bíceps braquial",
+    //                   "content": "Lorem Ipsum"
+    //               }
+    //           },
+    //       ]
+    //   },
+    // "anatomic_categories_attributes":[
+    // {	"atlas_category_id": 22}
+    // ],
+    //   "url": "http://d2gg5obs453f89.cloudfront.net/1505152217025",
+    //   "name": "Brazo"
   };
 
-  handleCoverUpload = (info, type) => {
+  handleCoverUpload = (info, type, index) => {
+    const i = index[0];
+    const j = index[1];
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList);
     }
     if (info.file.status === 'done') {
       message.success(`${info.file.name} file uploaded successfully`);
-      // this.setState({});
+      const prefix = 'http://d2gg5obs453f89.cloudfront.net/';
+      const atlas = this.state.atlas;
+      const anatomic_map = atlas.atlas_categories[i].anatomic_maps[j];
+      const fileName = info.fileList[0].response.fileNames[0];
+      const fUrl = prefix + fileName;
+      switch (type) {
+        case 'm3d':
+          anatomic_map.url3d = fUrl;
+          break;
+        case 'xray':
+          anatomic_map.xray.push({ url: fUrl });
+          break;
+        case 'images':
+          anatomic_map.img.push({ url: fUrl });
+          break;
+        default:
+          break;
+      }
+      this.setState({ atlas });
+      console.log(this.state);
     } else if (info.file.status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
     }
   };
-
+  addAnatomicMap = i => {
+    const newMap = {
+      img: [],
+      xray: [],
+      url3d: null,
+      m3d: {}
+    };
+    const atlas = this.state.atlas;
+    atlas.atlas_categories[i].anatomic_maps.push(newMap);
+    this.setState({ atlas });
+  };
   render() {
-    const cat = this.state.atlas.atlas_categories.map(item => (
-      <SRow key={item.tag}>
-        <Col span={20}>
-          <CategoryName>{item.tag}</CategoryName>
-        </Col>
-        <Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button>Añadir mapa anatomico</Button>
-        </Col>
-        <Col span={24} justify="end">
-          <Row justify="end">
-            <Col span={8}>
-              <CategoryName>{item.tag}</CategoryName>
-            </Col>
-            <Col
-              span={16}
-              style={{ display: 'flex', justifyContent: 'flex-end' }}
-            >
-              Agregar
-              <Button>
-                <FaAlignJustify />
-              </Button>
-              <Upload
-                action={this.state.endpoint}
-                onChange={info => this.handleCoverUpload(info, 'm3d')}
-                name="file"
-                style={{ display: 'inline-block' }}
-              >
-                <Button>
-                  <FaCodepen />
-                </Button>
-              </Upload>
-              <Upload
-                action={this.state.endpoint}
-                onChange={this.handleCoverUpload}
-                name="file"
-                style={{ display: 'inline-block' }}
-              >
-                <Button>
-                  <FaXRay />
-                </Button>
-              </Upload>
-              <Button>
-                <FaYoutube />
-              </Button>
-              <Upload
-                action={this.state.endpoint}
-                onChange={this.handleCoverUpload}
-                name="file"
-                style={{ display: 'inline-block' }}
-              >
-                <Button>
-                  <FaRegImages />
-                </Button>
-              </Upload>
-              <Button>
-                <FaRegSave /> Guardar Mapa Anatomico
-              </Button>
-            </Col>
-          </Row>
-        </Col>
-      </SRow>
+    const cat = this.state.atlas.atlas_categories.map((item, i) => (
+      <div key={i}>
+        <SRow>
+          <Col span={20}>
+            <CategoryName>{item.tag}</CategoryName>
+          </Col>
+          <Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={() => this.addAnatomicMap(i)}>
+              Añadir mapa anatomico
+            </Button>
+          </Col>
+          {item.anatomic_maps.map((amap, j) => (
+            <ColForm key={j} span={24} justify="end">
+              <Row justify="end">
+                <Col span={8}>
+                  {/* <CategoryName>{item.tag}</CategoryName> */}
+                </Col>
+                <Col
+                  span={16}
+                  style={{ display: 'flex', justifyContent: 'flex-end' }}
+                >
+                  Agregar
+                  <Button>
+                    <FaAlignJustify />
+                  </Button>
+                  <Upload
+                    action={this.state.endpoint}
+                    onChange={info =>
+                      this.handleCoverUpload(info, 'm3d', [i, j])
+                    }
+                    name="file"
+                  >
+                    <Button>
+                      <FaCodepen />
+                    </Button>
+                  </Upload>
+                  <Upload
+                    action={this.state.endpoint}
+                    onChange={info =>
+                      this.handleCoverUpload(info, 'xray', [i, j])
+                    }
+                    name="file"
+                  >
+                    <Button>
+                      <FaXRay />
+                    </Button>
+                  </Upload>
+                  <Button>
+                    <FaYoutube />
+                  </Button>
+                  <Upload
+                    action={this.state.endpoint}
+                    onChange={info =>
+                      this.handleCoverUpload(info, 'images', [i, j])
+                    }
+                    name="file"
+                  >
+                    <Button>
+                      <FaRegImages />
+                    </Button>
+                  </Upload>
+                  <Button>
+                    <FaRegSave /> Guardar Mapa Anatomico
+                  </Button>
+                </Col>
+              </Row>
+            </ColForm>
+          ))}
+        </SRow>
+      </div>
     ));
     return (
       <div>
