@@ -10,6 +10,10 @@ import Renderer3D, {
 import { Button } from 'antd';
 
 export class M3d extends Component {
+
+  static defaultProps = {
+    editing: false
+  }
   constructor(props) {
     super(props);
     this.render3d = createRef();
@@ -33,7 +37,7 @@ export class M3d extends Component {
       infoPanel: this.infoPanel.current,
       container: this.render3d.current,
       configGui: this.configGui.current,
-      editable: false,
+      editable: this.props.editing,
       initial: this.props.initial,
       callbacks: {
         addAttachment: console.log,
@@ -41,7 +45,7 @@ export class M3d extends Component {
         updateAttachmentData: console.log,
         updateAttachmentDefaultScreen: console.log,
         updateAttachmentPosition: console.log,
-        updateDefaultOrbit: console.log
+        updateDefaultOrbit: console.log,
       }
     });
     this.renderer.animate();
@@ -53,6 +57,11 @@ export class M3d extends Component {
   setCurrentAsInitial = () => {
     this.renderer.setCurrentAsInitial();
   };
+
+  getCurrentState = () => {
+    return this.renderer.getCurrentState()
+
+  }
 
   render() {
     return (
@@ -74,8 +83,10 @@ export class M3d extends Component {
             <Controls />
           </div>
         </div>
-        <Button onClick={this.reset}>Reset</Button>
-        {/* <button onClick={this.setCurrentAsInitial}>ChangeInitial</button> */}
+        <Button onClick={this.reset}>Posición Inicial</Button>
+        {this.props.editing && [
+          <Button key="changeInitial" onClick={this.setCurrentAsInitial}>Cambiar Posición Inicial</Button>,
+        ]}
       </div>
     );
   }

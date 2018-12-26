@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import styled from 'styled-components';
 import {
   Layout,
@@ -9,7 +9,8 @@ import {
   Icon,
   Button,
   Row,
-  Col
+  Col,
+  Modal,
 } from 'antd';
 import {
   FaAlignJustify,
@@ -23,6 +24,8 @@ import { GoBook } from 'react-icons/go';
 
 import axios from 'axios';
 import Item from 'antd/lib/list/Item';
+import { visible } from 'ansi-colors';
+import { M3d } from '../../atlas/anatomic-model/m3d';
 
 const { Header, Content } = Layout;
 
@@ -51,6 +54,12 @@ const ColForm = styled(Col)`
   margin-bottom: 10px;
 `;
 
+const M3dContainer = styled.div`
+  width: 900px;
+  position: relative;
+`
+
+
 export class StepTwo extends Component {
   constructor(props) {
     super(props);
@@ -60,8 +69,12 @@ export class StepTwo extends Component {
       atlas: {
         atlas_categories: [],
         title: ''
+      },
+      m3d: {
+        modal: false,
       }
     };
+    this.m3d = createRef()
   }
   async componentDidMount() {
     const config = {
@@ -163,7 +176,12 @@ export class StepTwo extends Component {
       switch (type) {
         case 'm3d':
           anatomic_map.url3d = fUrl;
-          // GABO: ACA ACABA DE LLEGAR LA URL CON EL ARCHIVO ZIP
+          this.setState(() => ({
+            m3d: {
+              modal: true,
+              url: fUrl,
+            }
+          }))
           break;
         case 'xray':
           anatomic_map.xray.push({ url: fUrl });
@@ -191,6 +209,24 @@ export class StepTwo extends Component {
     atlas.atlas_categories[i].anatomic_maps.push(newMap);
     this.setState({ atlas });
   };
+
+  handleM3dSave = async () => {
+    const data = this.m3d.current.getCurrentState()
+    console.log(data)
+    this.setState(state => ({
+      m3d: {
+        ...state.m3d,
+        loading: true,
+      }
+    }))
+    await new Promise(res => setTimeout(res, 1000))
+    this.setState({
+      m3d: {
+        loading: false,
+        modal: false,
+      }
+    })
+  }
   render() {
     const cat = this.state.atlas.atlas_categories.map((item, i) => (
       <div key={i}>
@@ -265,6 +301,15 @@ export class StepTwo extends Component {
     ));
     return (
       <div>
+        <Modal visible={this.state.m3d.modal} footer={[
+          <Button key="save" type="primary" loading={this.state.m3d.loading} onClick={this.handleM3dSave}>Guardar</Button>
+        ]} width={1000}>
+          {this.state.m3d.url && (
+            <M3dContainer>
+              <M3d url={this.state.m3d.url} editing={true} ref={this.m3d}/>
+            </M3dContainer>
+          )}
+        </Modal>
         <Layout>
           <Title>Crear Atlas</Title>
           <SubTitle>Formulario de creación de Atlas</SubTitle>
