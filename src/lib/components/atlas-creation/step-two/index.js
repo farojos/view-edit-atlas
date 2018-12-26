@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import styled from 'styled-components';
 import {
   Layout,
@@ -9,7 +9,7 @@ import {
   Button,
   Row,
   Col,
-  Modal
+  Modal,
 } from 'antd';
 import {
   FaAlignJustify,
@@ -22,6 +22,7 @@ import {
 import { GoBook } from 'react-icons/go';
 
 import axios from 'axios';
+import { M3d } from '../../atlas/anatomic-model/m3d';
 
 const { Content } = Layout;
 
@@ -50,6 +51,12 @@ const ColForm = styled(Col)`
   margin-bottom: 10px;
 `;
 
+const M3dContainer = styled.div`
+  width: 900px;
+  position: relative;
+`
+
+
 export class StepTwo extends Component {
   constructor(props) {
     super(props);
@@ -59,7 +66,7 @@ export class StepTwo extends Component {
       atlas: {
         atlas_categories: [],
         title: ''
-      }
+      },
     };
   }
   async componentDidMount() {
@@ -161,8 +168,13 @@ class prevForm extends Component {
       endpoint:
         'http://ec2-18-223-172-78.us-east-2.compute.amazonaws.com/api/v1/storage/store',
       disabled: false,
-      visible: false
+      visible: false,
+      m3d: {
+        modal: false,
+      }
     };
+
+    this.m3d = createRef()
   }
   send = async e => {
     e.preventDefault();
@@ -254,7 +266,12 @@ class prevForm extends Component {
       switch (type) {
         case 'm3d':
           anatomic_map.url3d = fUrl;
-          // GABO: ACA ACABA DE LLEGAR LA URL CON EL ARCHIVO ZIP
+          this.setState(() => ({
+            m3d: {
+              modal: true,
+              url: fUrl,
+            }
+          }))
           break;
         case 'xray':
           anatomic_map.xray.push({ url: fUrl });
@@ -272,16 +289,32 @@ class prevForm extends Component {
     }
   };
   showModal = () => {
-    this.setState({ visible: true });
+    this.setState({ visible: true })
   };
   handleCancel = () => {
-    const visible = false;
-    this.setState({ visible }, () => console.log(this.state));
+    this.setState({ visible: false });
   };
   handleCreate = () => {
-    console.log('hola');
+    this.setState({ visible: false });  
   };
 
+  handleM3dSave = async () => {
+    const data = this.m3d.current.getCurrentState()
+    console.log(data)
+    this.setState(state => ({
+      m3d: {
+        ...state.m3d,
+        loading: true,
+      }
+    }))
+    await new Promise(res => setTimeout(res, 1000))
+    this.setState({
+      m3d: {
+        loading: false,
+        modal: false,
+      }
+    })
+  }
   render() {
     const {
       getFieldDecorator,
@@ -290,6 +323,7 @@ class prevForm extends Component {
       isFieldTouched
     } = this.props.form;
     const { i, j } = this.props.index;
+    console.log(this.state)
     return (
       <Form layout="inline" onSubmit={this.send}>
         <Row justify="end">
@@ -318,15 +352,15 @@ class prevForm extends Component {
             <Button disabled={this.state.disabled} onClick={this.showModal}>
               <FaAlignJustify />
               {/* {console.log(this.state.visible)} */}
-              <Modal
-                visible={this.state.visible}
-                title="Añada una descripción del mapa anatomico"
-                okText="Guardar"
-                cancelText="Cancelar"
-                onCancel={this.handleCancel}
-                onOk={this.handleCreate}
-              />
             </Button>
+            <Modal
+              visible={this.state.visible}
+              title="Añada una descripción del mapa anatomico"
+              okText="Guardar"
+              cancelText="Cancelar"
+              onCancel={this.handleCancel}
+              onOk={this.handleCreate}
+            />
             <Upload
               action={this.state.endpoint}
               onChange={info => this.handleCoverUpload(info, 'm3d', [i, j])}
@@ -368,6 +402,16 @@ class prevForm extends Component {
             </Form.Item>
           </Col>
         </Row>
+
+        <Modal visible={this.state.m3d.modal} foter={[
+          <Button key="save" type="primary" loading={this.state.m3d.loading} onClick={this.handleM3dSave}>Guardar</Button>
+        ]} width={1000}>
+          {this.state.m3d.url && (
+            <M3dContainer>
+              <M3d url={this.state.m3d.url} editing={true} ref={this.m3d}/>
+            </M3dContainer>
+          )}
+        </Modal>
       </Form>
     );
   }

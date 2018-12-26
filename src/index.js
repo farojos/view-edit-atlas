@@ -8,7 +8,7 @@ render(
     <AtlasCreation
       finish={console.log}
       responsableId={'fd1b2d5e-7500-4b69-9880-ab1d8b9fe148'}
-      organizationId={'001c2841-436d-420e-a44c-7673eb005fda'}
+      organizationId={'001c2841-436d-420e-a44c-7673eb005fda'} 
     />
   </div>,
   document.getElementById('root')
