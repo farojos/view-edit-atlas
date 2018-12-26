@@ -183,7 +183,6 @@ export class StepOne extends Component {
     };
   }
   send = async values => {
-    console.log(values);
     const description = values.description;
     const name = values.name;
     const cat = values.categories;

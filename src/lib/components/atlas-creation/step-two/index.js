@@ -74,47 +74,46 @@ export class StepTwo extends Component {
     this.setState({ atlas: result.data });
   }
   send = async values => {
-    console.log(values);
-    const description = values.description;
-    const name = values.name;
-    const cat = values.categories;
-    const newCat = cat.slice(1, cat.length).map(item => {
-      return { tag: item };
-    });
-    const url =
-      'http://ec2-18-222-136-65.us-east-2.compute.amazonaws.com/atlas/';
-    const data = {
-      atla: {
-        title: name,
-        description: description,
-        organization_id: this.props.organizationId,
-        responsable_id: this.props.responsableId,
-        cover: {
-          url: 'http://d2gg5obs453f89.cloudfront.net/' + this.state.cover
-        },
-        atlas_categories_attributes: newCat
-      }
-    };
-    const options = {
-      method: 'POST',
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      data: JSON.stringify(data),
-      url
-    };
-    const result = await axios(options);
-    this.props.changeStep({ atlasId: result.data.id, step: 2 });
+    // const description = values.description;
+    // const name = values.name;
+    // const cat = values.categories;
+    // const newCat = cat.slice(1, cat.length).map(item => {
+    //   return { tag: item };
+    // });
+    // const url =
+    //   'http://ec2-18-222-136-65.us-east-2.compute.amazonaws.com/atlas/';
+    // const data = {
+    //   atla: {
+    //     title: name,
+    //     description: description,
+    //     organization_id: this.props.organizationId,
+    //     responsable_id: this.props.responsableId,
+    //     cover: {
+    //       url: 'http://d2gg5obs453f89.cloudfront.net/' + this.state.cover
+    //     },
+    //     atlas_categories_attributes: newCat
+    //   }
+    // };
+    // const options = {
+    //   method: 'POST',
+    //   headers: {
+    //     'Access-Control-Allow-Origin': '*',
+    //     'Content-Type': 'application/json'
+    //   },
+    //   data: JSON.stringify(data),
+    //   url
+    // };
+    // const result = await axios(options);
+    // this.props.changeStep({ atlasId: result.data.id, step: 2 });
   };
 
-  handleCoverUpload = info => {
+  handleCoverUpload = (info, type) => {
     if (info.file.status !== 'uploading') {
       console.log(info.file, info.fileList);
     }
     if (info.file.status === 'done') {
       message.success(`${info.file.name} file uploaded successfully`);
-      this.setState({ cover: info.fileList[0].response.fileNames[0] });
+      // this.setState({});
     } else if (info.file.status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
     }
@@ -144,7 +143,7 @@ export class StepTwo extends Component {
               </Button>
               <Upload
                 action={this.state.endpoint}
-                onChange={this.handleCoverUpload}
+                onChange={info => this.handleCoverUpload(info, 'm3d')}
                 name="file"
                 style={{ display: 'inline-block' }}
               >
@@ -202,33 +201,8 @@ export class StepTwo extends Component {
               </h2>
             </SRow>
             {cat}
-            {/* <Upload
-              action={this.state.endpoint}
-              onChange={this.handleCoverUpload}
-              name="file"
-              style={{ display: 'inline-block' }}
-            >
-              <Button style={{ display: 'inline-block' }}>
-                <FaCodepen />
-              </Button>
-              <Button style={{ display: 'inline-block' }}>
-                <FaXRay />
-              </Button>
-            </Upload>
-            <Upload
-              action={this.state.endpoint}
-              onChange={this.handleCoverUpload}
-              name="file"
-              style={{ display: 'inline-block' }}
-            >
-              <Button style={{ display: 'inline-block' }}>
-                <FaRegImages />
-              </Button>
-            </Upload> */}
-            {/* <DF send={this.send} /> */}
           </Content>
         </Layout>
-        {/* <div>{this.props.atlasId}</div> */}
       </div>
     );
   }
