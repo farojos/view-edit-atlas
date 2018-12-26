@@ -23,6 +23,7 @@ import { GoBook } from 'react-icons/go';
 
 import axios from 'axios';
 import { M3d } from '../../atlas/anatomic-model/m3d';
+import TextArea from 'antd/lib/input/TextArea';
 
 const { Content } = Layout;
 
@@ -68,6 +69,8 @@ export class StepTwo extends Component {
         title: ''
       },
     };
+
+    this.RForm = Form.create()(prevForm);
   }
   async componentDidMount() {
     const config = {
@@ -107,6 +110,7 @@ export class StepTwo extends Component {
     this.setState({ atlas });
   };
   render() {
+    console.log(this.state)
     const cat = this.state.atlas.atlas_categories.map((item, i) => (
       <div key={i}>
         <SRow>
@@ -119,11 +123,10 @@ export class StepTwo extends Component {
             </Button>
           </Col>
           {item.anatomic_maps.map((amap, j) => {
-            const RForm = Form.create()(prevForm);
 
             return (
               <ColForm key={j} span={24} justify="end">
-                <RForm
+                <this.RForm
                   index={{ i: i, j: j }}
                   sState={this.handlerSet}
                   gState={this.handlerGet}
@@ -300,14 +303,18 @@ class prevForm extends Component {
 
   handleM3dSave = async () => {
     const data = this.m3d.current.getCurrentState()
-    console.log(data)
     this.setState(state => ({
       m3d: {
         ...state.m3d,
         loading: true,
       }
     }))
-    await new Promise(res => setTimeout(res, 1000))
+    const { i , j } = this.props.index
+    const { atlas } = { ...this.props.gState() }
+    atlas.atlas_categories[i].anatomic_maps[j].m3d = data
+    this.props.sState({
+      atlas
+    })
     this.setState({
       m3d: {
         loading: false,
@@ -323,7 +330,6 @@ class prevForm extends Component {
       isFieldTouched
     } = this.props.form;
     const { i, j } = this.props.index;
-    console.log(this.state)
     return (
       <div>
         
@@ -362,7 +368,23 @@ class prevForm extends Component {
               cancelText="Cancelar"
               onCancel={this.handleCancel}
               onOk={this.handleCreate}
-            />
+              >
+              <Form.Item>
+              {getFieldDecorator('description', {
+                rules: [
+                  {
+                    required: true,
+                    message: 'Ingrese una description del mapa anatomico'
+                  }
+                ]
+              })(
+                <TextArea
+
+                  disabled={this.state.disabled}
+                />
+              )}
+            </Form.Item>
+              </Modal>
             <Upload
               action={this.state.endpoint}
               onChange={info => this.handleCoverUpload(info, 'm3d', [i, j])}

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Layout, Upload, message, Form, Input, Icon, Button } from 'antd';
+import TextArea from 'antd/lib/input/TextArea';
 
 import { FaRegImages } from 'react-icons/fa';
 import axios from 'axios';
@@ -155,7 +156,7 @@ class DynamicFieldSet extends Component {
                 message: 'Agrega una descripción al Atlas'
               }
             ]
-          })(<Input placeholder="Agrega una descripción" />)}
+          })(<TextArea placeholder="Agrega una descripción" />)}
         </Form.Item>
         {formItems}
         <Form.Item {...formItemLayoutWithOutLabel}>
