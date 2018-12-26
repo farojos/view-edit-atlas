@@ -1,6 +1,16 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { Layout, Upload, message, Form, Input, Button, Row, Col } from 'antd';
+import {
+  Layout,
+  Upload,
+  message,
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  Modal
+} from 'antd';
 import {
   FaAlignJustify,
   FaYoutube,
@@ -69,7 +79,99 @@ export class StepTwo extends Component {
     });
     this.setState({ atlas });
   }
+  componentDidUpdate() {
+    console.log(this.state);
+  }
+  handlerSet = newState => {
+    this.setState(newState);
+  };
+  handlerGet = () => {
+    return this.state;
+  };
+  addAnatomicMap = i => {
+    const newMap = {
+      img: [],
+      xray: [],
+      url3d: null,
+      m3d: {}
+    };
+    const atlas = this.state.atlas;
+    atlas.atlas_categories[i].anatomic_maps.push(newMap);
+    this.setState({ atlas });
+  };
+  render() {
+    const cat = this.state.atlas.atlas_categories.map((item, i) => (
+      <div key={i}>
+        <SRow>
+          <Col span={20}>
+            <CategoryName>{item.tag}</CategoryName>
+          </Col>
+          <Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={() => this.addAnatomicMap(i)}>
+              Añadir mapa anatomico
+            </Button>
+          </Col>
+          {item.anatomic_maps.map((amap, j) => {
+            const RForm = Form.create()(prevForm);
+
+            return (
+              <ColForm key={j} span={24} justify="end">
+                <RForm
+                  index={{ i: i, j: j }}
+                  sState={this.handlerSet}
+                  gState={this.handlerGet}
+                />
+              </ColForm>
+            );
+          })}
+        </SRow>
+      </div>
+    ));
+    return (
+      <div>
+        <Layout>
+          <Title>Crear Atlas</Title>
+          <SubTitle>Formulario de creación de Atlas</SubTitle>
+        </Layout>
+        <Layout>
+          <Content>
+            <Description>
+              En el siguiente formulario uds debe crear mapas anatomicos
+              agrupados en las categorias previamente creadas.
+            </Description>
+            <SRow>
+              <h2>
+                <Book />
+                {this.state.atlas.title}
+              </h2>
+            </SRow>
+            {cat}
+          </Content>
+        </Layout>
+      </div>
+    );
+  }
+}
+
+class prevForm extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      endpoint:
+        'http://ec2-18-223-172-78.us-east-2.compute.amazonaws.com/api/v1/storage/store',
+      disabled: false,
+      visible: false
+    };
+  }
   send = async e => {
+    e.preventDefault();
+    this.setState({ disabled: true });
+    this.props.form.validateFields((err, values) => {
+      if (!err) {
+        console.log(values);
+      }
+    });
     // const description = values.description;
     // const name = values.name;
     // const cat = values.categories;
@@ -135,7 +237,6 @@ export class StepTwo extends Component {
     //   "url": "http://d2gg5obs453f89.cloudfront.net/1505152217025",
     //   "name": "Brazo"
   };
-
   handleCoverUpload = (info, type, index) => {
     const i = index[0];
     const j = index[1];
@@ -145,7 +246,8 @@ export class StepTwo extends Component {
     if (info.file.status === 'done') {
       message.success(`${info.file.name} file uploaded successfully`);
       const prefix = 'http://d2gg5obs453f89.cloudfront.net/';
-      const atlas = this.state.atlas;
+      const atlas = this.props.gState().atlas; //this.state.atlas;
+
       const anatomic_map = atlas.atlas_categories[i].anatomic_maps[j];
       const fileName = info.fileList[0].response.fileNames[0];
       const fUrl = prefix + fileName;
@@ -163,115 +265,110 @@ export class StepTwo extends Component {
         default:
           break;
       }
-      this.setState({ atlas });
-      console.log(this.state);
+      // this.setState({ atlas });
+      this.props.sState({ atlas });
     } else if (info.file.status === 'error') {
       message.error(`${info.file.name} file upload failed.`);
     }
   };
-  addAnatomicMap = i => {
-    const newMap = {
-      img: [],
-      xray: [],
-      url3d: null,
-      m3d: {}
-    };
-    const atlas = this.state.atlas;
-    atlas.atlas_categories[i].anatomic_maps.push(newMap);
-    this.setState({ atlas });
+  showModal = () => {
+    this.setState({ visible: true });
   };
+  handleCancel = () => {
+    const visible = false;
+    this.setState({ visible }, () => console.log(this.state));
+  };
+  handleCreate = () => {
+    console.log('hola');
+  };
+
   render() {
-    const cat = this.state.atlas.atlas_categories.map((item, i) => (
-      <div key={i}>
-        <SRow>
-          <Col span={20}>
-            <CategoryName>{item.tag}</CategoryName>
-          </Col>
-          <Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button onClick={() => this.addAnatomicMap(i)}>
-              Añadir mapa anatomico
-            </Button>
-          </Col>
-          {item.anatomic_maps.map((amap, j) => (
-            <ColForm key={j} span={24} justify="end">
-              <Row justify="end">
-                <Col span={8} />
-                <Col
-                  span={16}
-                  style={{ display: 'flex', justifyContent: 'flex-end' }}
-                >
-                  Agregar
-                  <Button>
-                    <FaAlignJustify />
-                  </Button>
-                  <Upload
-                    action={this.state.endpoint}
-                    onChange={info =>
-                      this.handleCoverUpload(info, 'm3d', [i, j])
-                    }
-                    name="file"
-                  >
-                    <Button>
-                      <FaCodepen />
-                    </Button>
-                  </Upload>
-                  <Upload
-                    action={this.state.endpoint}
-                    onChange={info =>
-                      this.handleCoverUpload(info, 'xray', [i, j])
-                    }
-                    name="file"
-                  >
-                    <Button>
-                      <FaXRay />
-                    </Button>
-                  </Upload>
-                  <Button disabled={true}>
-                    <FaYoutube />
-                  </Button>
-                  <Upload
-                    action={this.state.endpoint}
-                    onChange={info =>
-                      this.handleCoverUpload(info, 'images', [i, j])
-                    }
-                    name="file"
-                  >
-                    <Button>
-                      <FaRegImages />
-                    </Button>
-                  </Upload>
-                  <Button>
-                    <FaRegSave /> Guardar Mapa Anatomico
-                  </Button>
-                </Col>
-              </Row>
-            </ColForm>
-          ))}
-        </SRow>
-      </div>
-    ));
+    const {
+      getFieldDecorator,
+      getFieldsError,
+      getFieldError,
+      isFieldTouched
+    } = this.props.form;
+    const { i, j } = this.props.index;
     return (
-      <div>
-        <Layout>
-          <Title>Crear Atlas</Title>
-          <SubTitle>Formulario de creación de Atlas</SubTitle>
-        </Layout>
-        <Layout>
-          <Content>
-            <Description>
-              En el siguiente formulario uds debe crear mapas anatomicos
-              agrupados en las categorias previamente creadas.
-            </Description>
-            <SRow>
-              <h2>
-                <Book />
-                {this.state.atlas.title}
-              </h2>
-            </SRow>
-            {cat}
-          </Content>
-        </Layout>
-      </div>
+      <Form layout="inline" onSubmit={this.send}>
+        <Row justify="end">
+          <Col span={8}>
+            <Form.Item>
+              {getFieldDecorator('name', {
+                rules: [
+                  {
+                    required: true,
+                    message: 'Ingrese nombre del mapa anatomico'
+                  }
+                ]
+              })(
+                <Input
+                  placeholder="Nombre mapa anatomico"
+                  disabled={this.state.disabled}
+                />
+              )}
+            </Form.Item>
+          </Col>
+          <Col
+            span={16}
+            style={{ display: 'flex', justifyContent: 'flex-end' }}
+          >
+            Agregar
+            <Button disabled={this.state.disabled} onClick={this.showModal}>
+              <FaAlignJustify />
+              {/* {console.log(this.state.visible)} */}
+              <Modal
+                visible={this.state.visible}
+                title="Añada una descripción del mapa anatomico"
+                okText="Guardar"
+                cancelText="Cancelar"
+                onCancel={this.handleCancel}
+                onOk={this.handleCreate}
+              />
+            </Button>
+            <Upload
+              action={this.state.endpoint}
+              onChange={info => this.handleCoverUpload(info, 'm3d', [i, j])}
+              name="file"
+            >
+              <Button disabled={this.state.disabled}>
+                <FaCodepen />
+              </Button>
+            </Upload>
+            <Upload
+              action={this.state.endpoint}
+              onChange={info => this.handleCoverUpload(info, 'xray', [i, j])}
+              name="file"
+            >
+              <Button disabled={this.state.disabled}>
+                <FaXRay />
+              </Button>
+            </Upload>
+            <Button disabled={true}>
+              <FaYoutube />
+            </Button>
+            <Upload
+              action={this.state.endpoint}
+              onChange={info => this.handleCoverUpload(info, 'images', [i, j])}
+              name="file"
+            >
+              <Button disabled={this.state.disabled}>
+                <FaRegImages />
+              </Button>
+            </Upload>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={this.state.disabled}
+              >
+                <FaRegSave /> Guardar Mapa Anatomico
+              </Button>
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
     );
   }
 }
