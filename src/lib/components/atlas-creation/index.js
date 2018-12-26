@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import 'antd/dist/antd.css';
+import './index.css';
 import { StepOne } from './step-one';
 import { StepTwo } from './step-two';
 export class AtlasCreation extends Component {
@@ -7,7 +8,7 @@ export class AtlasCreation extends Component {
     super(props);
 
     this.state = {
-      step: 1,
+      step: 2,
       atlasId: null
     };
   }
