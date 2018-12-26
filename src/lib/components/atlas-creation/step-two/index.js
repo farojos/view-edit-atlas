@@ -1,16 +1,6 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import {
-  Layout,
-  Upload,
-  message,
-  Form,
-  Input,
-  Icon,
-  Button,
-  Row,
-  Col
-} from 'antd';
+import { Layout, Upload, message, Form, Input, Button, Row, Col } from 'antd';
 import {
   FaAlignJustify,
   FaYoutube,
@@ -22,9 +12,8 @@ import {
 import { GoBook } from 'react-icons/go';
 
 import axios from 'axios';
-import Item from 'antd/lib/list/Item';
 
-const { Header, Content } = Layout;
+const { Content } = Layout;
 
 const Title = styled.h1`
   color: dimgray;
@@ -80,7 +69,7 @@ export class StepTwo extends Component {
     });
     this.setState({ atlas });
   }
-  send = async values => {
+  send = async e => {
     // const description = values.description;
     // const name = values.name;
     // const cat = values.categories;
@@ -206,9 +195,7 @@ export class StepTwo extends Component {
           {item.anatomic_maps.map((amap, j) => (
             <ColForm key={j} span={24} justify="end">
               <Row justify="end">
-                <Col span={8}>
-                  {/* <CategoryName>{item.tag}</CategoryName> */}
-                </Col>
+                <Col span={8} />
                 <Col
                   span={16}
                   style={{ display: 'flex', justifyContent: 'flex-end' }}
@@ -239,7 +226,7 @@ export class StepTwo extends Component {
                       <FaXRay />
                     </Button>
                   </Upload>
-                  <Button>
+                  <Button disabled={true}>
                     <FaYoutube />
                   </Button>
                   <Upload
