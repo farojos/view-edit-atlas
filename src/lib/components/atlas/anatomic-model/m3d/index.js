@@ -64,6 +64,7 @@ export class M3d extends Component {
   }
 
   render() {
+    console.log(this)
     return (
       <div
         style={{

@@ -266,12 +266,12 @@ class prevForm extends Component {
       switch (type) {
         case 'm3d':
           anatomic_map.url3d = fUrl;
-          this.setState(() => ({
+          this.setState({
             m3d: {
               modal: true,
               url: fUrl,
             }
-          }))
+          }, () => console.log(this.state))
           break;
         case 'xray':
           anatomic_map.xray.push({ url: fUrl });
@@ -325,6 +325,8 @@ class prevForm extends Component {
     const { i, j } = this.props.index;
     console.log(this.state)
     return (
+      <div>
+        
       <Form layout="inline" onSubmit={this.send}>
         <Row justify="end">
           <Col span={8}>
@@ -402,8 +404,8 @@ class prevForm extends Component {
             </Form.Item>
           </Col>
         </Row>
-
-        <Modal visible={this.state.m3d.modal} foter={[
+      </Form>
+      <Modal visible={this.state.m3d.modal} footer={[
           <Button key="save" type="primary" loading={this.state.m3d.loading} onClick={this.handleM3dSave}>Guardar</Button>
         ]} width={1000}>
           {this.state.m3d.url && (
@@ -412,7 +414,7 @@ class prevForm extends Component {
             </M3dContainer>
           )}
         </Modal>
-      </Form>
+      </div>
     );
   }
 }
