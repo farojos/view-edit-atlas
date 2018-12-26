@@ -9,7 +9,7 @@ export class AtlasCreation extends Component {
 
     this.state = {
       step: 2,
-      atlasId: null
+      atlasId: '68c67704-6f82-4503-bd96-7863461ffcda'
     };
   }
   changeStep = state => {

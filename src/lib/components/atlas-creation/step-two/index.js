@@ -1,8 +1,28 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
-import { Layout, Upload, message, Form, Input, Icon, Button } from 'antd';
-import { FaRegImages, FaCodepen, FaXRay } from 'react-icons/fa';
+import {
+  Layout,
+  Upload,
+  message,
+  Form,
+  Input,
+  Icon,
+  Button,
+  Row,
+  Col
+} from 'antd';
+import {
+  FaAlignJustify,
+  FaYoutube,
+  FaRegImages,
+  FaCodepen,
+  FaXRay,
+  FaRegSave
+} from 'react-icons/fa';
+import { GoBook } from 'react-icons/go';
+
 import axios from 'axios';
+import Item from 'antd/lib/list/Item';
 
 const { Header, Content } = Layout;
 
@@ -15,126 +35,49 @@ const SubTitle = styled.h2`
 const Description = styled.p`
   color: lightgray;
 `;
-let id = 0;
+const SRow = styled(Row)`
+  border-top: 2px solid lightgray;
+  padding: 10px;
+`;
+const Book = styled(GoBook)`
+  margin-right: 5px;
+  display: inline-block;
+`;
+const CategoryName = styled.h2`
+  color: gray;
+  display: inline-block;
+`;
 
-class DynamicFieldSet extends Component {
-  remove = k => {
-    const { form } = this.props;
-    // can use data-binding to get
-    const keys = form.getFieldValue('keys');
-    // We need at least one passenger
-    if (keys.length === 1) {
-      return;
-    }
-
-    // can use data-binding to set
-    form.setFieldsValue({
-      keys: keys.filter(key => key !== k)
-    });
-  };
-  componentDidMount() {
-    this.add();
-  }
-  add = () => {
-    const { form } = this.props;
-    // can use data-binding to get
-    const keys = form.getFieldValue('keys');
-    const nextKeys = keys.concat(++id);
-    // can use data-binding to set
-    // important! notify form to detect changes
-    form.setFieldsValue({
-      keys: nextKeys
-    });
-  };
-
-  handleSubmit = e => {
-    e.preventDefault();
-    this.props.form.validateFields((err, values) => {
-      if (!err) {
-        this.props.send(values);
-      }
-    });
-  };
-
-  render() {
-    const { getFieldDecorator, getFieldValue } = this.props.form;
-    const formItemLayout = {
-      labelCol: {
-        xs: { span: 24 },
-        sm: { span: 4 }
-      },
-      wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 }
-      }
-    };
-    const formItemDescription = {
-      labelCol: {
-        xs: { span: 24 },
-        sm: { span: 2 }
-      },
-      wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 12 }
-      }
-    };
-    const formItemLayoutWithOutLabel = {
-      wrapperCol: {
-        xs: { span: 24, offset: 0 },
-        sm: { span: 12 }
-      }
-    };
-    getFieldDecorator('keys', { initialValue: [] });
-    const keys = getFieldValue('keys');
-
-    return (
-      <Form onSubmit={this.handleSubmit}>
-        <Form.Item {...formItemDescription}>
-          {getFieldDecorator('name', {
-            rules: [
-              {
-                required: true,
-                message: 'Agrega un nombre al Atlas'
-              }
-            ]
-          })(<Input placeholder="Agrega un nombre" />)}
-        </Form.Item>
-
-        <Form.Item {...formItemDescription}>
-          {getFieldDecorator('description', {
-            rules: [
-              {
-                required: true,
-                message: 'Agrega una descripción al Atlas'
-              }
-            ]
-          })(<Input placeholder="Agrega una descripción" />)}
-        </Form.Item>
-        <Form.Item {...formItemLayoutWithOutLabel}>
-          <Button type="primary" htmlType="submit">
-            Terminar
-          </Button>
-        </Form.Item>
-      </Form>
-    );
-  }
-}
-const DF = Form.create()(DynamicFieldSet);
 export class StepTwo extends Component {
   constructor(props) {
     super(props);
     this.state = {
       endpoint:
         'http://ec2-18-223-172-78.us-east-2.compute.amazonaws.com/api/v1/storage/store',
-      cover: null
+      atlas: {
+        atlas_categories: [],
+        title: ''
+      }
     };
+  }
+  async componentDidMount() {
+    const config = {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      }
+    };
+    const url =
+      'http://ec2-18-222-136-65.us-east-2.compute.amazonaws.com/atlas/' +
+      this.props.atlasId;
+    const result = await axios.get(url, config);
+    this.setState({ atlas: result.data });
   }
   send = async values => {
     console.log(values);
     const description = values.description;
     const name = values.name;
     const cat = values.categories;
-    // .slice(1,a.length)
     const newCat = cat.slice(1, cat.length).map(item => {
       return { tag: item };
     });
@@ -178,6 +121,68 @@ export class StepTwo extends Component {
   };
 
   render() {
+    const cat = this.state.atlas.atlas_categories.map(item => (
+      <SRow key={item.tag}>
+        <Col span={20}>
+          <CategoryName>{item.tag}</CategoryName>
+        </Col>
+        <Col span={4} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button>Añadir mapa anatomico</Button>
+        </Col>
+        <Col span={24} justify="end">
+          <Row justify="end">
+            <Col span={8}>
+              <CategoryName>{item.tag}</CategoryName>
+            </Col>
+            <Col
+              span={16}
+              style={{ display: 'flex', justifyContent: 'flex-end' }}
+            >
+              Agregar
+              <Button>
+                <FaAlignJustify />
+              </Button>
+              <Upload
+                action={this.state.endpoint}
+                onChange={this.handleCoverUpload}
+                name="file"
+                style={{ display: 'inline-block' }}
+              >
+                <Button>
+                  <FaCodepen />
+                </Button>
+              </Upload>
+              <Upload
+                action={this.state.endpoint}
+                onChange={this.handleCoverUpload}
+                name="file"
+                style={{ display: 'inline-block' }}
+              >
+                <Button>
+                  <FaXRay />
+                </Button>
+              </Upload>
+              <Button>
+                <FaYoutube />
+              </Button>
+              <Upload
+                action={this.state.endpoint}
+                onChange={this.handleCoverUpload}
+                name="file"
+                style={{ display: 'inline-block' }}
+              >
+                <Button>
+                  <FaRegImages />
+                </Button>
+              </Upload>
+              <Button>
+                <FaRegSave /> Guardar Mapa Anatomico
+              </Button>
+            </Col>
+          </Row>
+        </Col>
+      </SRow>
+    ));
     return (
       <div>
         <Layout>
@@ -187,29 +192,43 @@ export class StepTwo extends Component {
         <Layout>
           <Content>
             <Description>
-              En el siguiente formulario uds debe asignar un nombre al atlas a
-              crear. las categorias que este tenga. Una descripción del atlas en
-              su completitud y una foto representativa del mismo.
+              En el siguiente formulario uds debe crear mapas anatomicos
+              agrupados en las categorias previamente creadas.
             </Description>
+            <SRow>
+              <h2>
+                <Book />
+                {this.state.atlas.title}
+              </h2>
+            </SRow>
+            {cat}
+            {/* <Upload
+              action={this.state.endpoint}
+              onChange={this.handleCoverUpload}
+              name="file"
+              style={{ display: 'inline-block' }}
+            >
+              <Button style={{ display: 'inline-block' }}>
+                <FaCodepen />
+              </Button>
+              <Button style={{ display: 'inline-block' }}>
+                <FaXRay />
+              </Button>
+            </Upload>
             <Upload
               action={this.state.endpoint}
               onChange={this.handleCoverUpload}
               name="file"
+              style={{ display: 'inline-block' }}
             >
-              <Button>
-                <FaCodepen />
-              </Button>
-              <Button>
-                <FaXRay />
-              </Button>
-              <Button>
+              <Button style={{ display: 'inline-block' }}>
                 <FaRegImages />
               </Button>
-            </Upload>
-            <DF send={this.send} />
+            </Upload> */}
+            {/* <DF send={this.send} /> */}
           </Content>
         </Layout>
-        <div>{this.props.atlasId}</div>
+        {/* <div>{this.props.atlasId}</div> */}
       </div>
     );
   }
